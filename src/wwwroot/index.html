@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>La mia prima pagina HTML</title>
+		<link href="styles/main.css" rel="stylesheet" type="text/css"></link>
+	</head>
+	<body>
+		<h1>My home &#x3009; Control panel</h1>
+		<table id="homeplan">
+			<tr>
+				<td><img id="red" src="images/parts/red-off.png" data-status="off" width="816" height="350" /></td>
+				<td><img id="green" src="images/parts/green-off.png" data-status="off" width="678" height="350" /></td>
+				<td><img id="alarm" src="images/parts/alarm-off.png" data-status="off" width="138" height="350" /></td>
+			</tr>
+			<tr>
+				<td><img id="blue" src="images/parts/blue-off.png" data-status="off" width="816" height="579" /></td>
+				<td><img id="yellow" src="images/parts/yellow-off.png" data-status="off" width="678" height="579" /></td>
+				<td><img id="doorbell" src="images/parts/doorbell-off.png" data-status="off" width="138" height="579" /></td>
+			</tr>
+		<table>
+		
+		<script>
+		function HomeControlPanel() {
+			var self = this;
+			initUI();
+						
+			this.updateRoom = function(roomId, status) {
+				var room = document.getElementById(roomId);
+				room.src = 'images/parts/' + roomId + '-' + status + '.png';
+				room.setAttribute('data-status', status);
+			};
+			
+			this.updateAlarm = function(status) {
+				var alarm = document.getElementById('alarm');
+				alarm.src = 'images/parts/alarm-' + status + '.png';
+				alarm.setAttribute('data-status', status);
+			};
+			
+			this.updateDoorbell = function(status) {
+				var doorbell = document.getElementById('doorbell');
+				doorbell.src = 'images/parts/doorbell-' + status + '.png';
+				doorbell.setAttribute('data-status', status);
+			};
+			
+			function toggleRoomLight(event) {
+				var room = event.target;
+				var oppositeStatus = room.getAttribute("data-status") == "off" ? "on" : "off";
+				console.log("Turn " + room.id + " " + oppositeStatus);
+				self.updateRoom(room.id, oppositeStatus);
+			};
+			
+			function toggleAlarm(event) {
+				var alarm = event.target;
+				var oppositeStatus = alarm.getAttribute("data-status") == "off" ? "on" : "off";
+				console.log("Turn " + alarm.id + " " + oppositeStatus);
+				self.updateAlarm(oppositeStatus);
+			};
+			
+			function initUI() {
+				var rooms = ["red", "green", "blue", "yellow"];
+				var room;
+				for (var i = 0; i < rooms.length; i++) {
+					console.log(toggleRoomLight);
+					room = document.getElementById(rooms[i]);
+					room.addEventListener("click", toggleRoomLight, false);
+				}
+			}
+		}
+		var controlPanel = new HomeControlPanel();
+		
+		</script>
+		
+	</body>
+</html>
