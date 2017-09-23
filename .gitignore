@@ -13,6 +13,8 @@ project.lock.json
 *.userosscache
 *.sln.docstates
 
+[Pp]ackages/
+
 # Build results
 [Dd]ebug/
 [Dd]ebugPublic/
@@ -27,6 +29,7 @@ bld/
 msbuild.log
 msbuild.err
 msbuild.wrn
+log.txt
 
 # Visual Studio 2015
 .vs/

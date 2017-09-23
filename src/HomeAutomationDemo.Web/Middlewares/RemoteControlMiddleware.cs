@@ -3,15 +3,16 @@ using System.Net.WebSockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using HomeAutomationDemo.Service;
 using Microsoft.AspNetCore.Http;
+using HomeAutomationDemo.Web.Services;
+
 namespace HomeAutomationDemo.Middlewares {
     public class RemoteControlMiddleware
     {
         private readonly RequestDelegate next;
-        private readonly IRemoteControlService remoteControlService;
+        private readonly IDeviceControlFacility remoteControlService;
 
-        public RemoteControlMiddleware(RequestDelegate next, IRemoteControlService remoteControlService)
+        public RemoteControlMiddleware(RequestDelegate next, IDeviceControlFacility remoteControlService)
         {
             this.next = next;
             this.remoteControlService = remoteControlService;
@@ -30,6 +31,7 @@ namespace HomeAutomationDemo.Middlewares {
 
         private async Task HandleWebSocketConnection(HttpContext context, WebSocket webSocket)
 {
+            /*
     var buffer = new byte[1024 * 4];
     WebSocketReceiveResult result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
     while (!result.CloseStatus.HasValue)
@@ -50,6 +52,7 @@ namespace HomeAutomationDemo.Middlewares {
         result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
     }
     await webSocket.CloseAsync(result.CloseStatus.Value, result.CloseStatusDescription, CancellationToken.None);
+            */
 }
 
     }

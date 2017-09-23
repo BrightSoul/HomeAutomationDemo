@@ -10,7 +10,7 @@ namespace HomeAutomationDemo.Extensions {
                 ReceiveBufferSize = 4 * 1024
             };
             app.UseWebSockets(webSocketOptions);
-            app.UseMiddleware<RemoteControlMiddleware>();
+            //app.UseMiddleware<RemoteControlMiddleware>();
         }
     }
 }
