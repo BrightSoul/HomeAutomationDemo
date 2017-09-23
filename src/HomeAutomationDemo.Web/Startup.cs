@@ -9,6 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 using HomeAutomationDemo.Web.Services.DeviceControlFacilities;
 using HomeAutomationDemo.Web.Services;
 using HomeAutomationDemo.Web.Services.DeviceManager;
+using HomeAutomationDemo.Web.Middlewares;
 
 namespace HomeAutomationDemo
 {
@@ -32,6 +33,7 @@ namespace HomeAutomationDemo
 
             services.AddSingleton<IDeviceManager, DeviceManager>();
             services.AddSingleton<IDeviceStatusProvider>(serviceProvider => serviceProvider.GetService<IDeviceManager>());
+            services.AddSingleton<IWebSocketControlFacility>(serviceProvider => serviceProvider.GetServices<IDeviceControlFacility>().OfType<IWebSocketControlFacility>().First());
             
         }
 
@@ -47,15 +49,16 @@ namespace HomeAutomationDemo
             }
 
 
-            app.UseStaticFiles();
-            app.UseDefaultFiles();
-
             var webSocketOptions = new WebSocketOptions()
             {
                 KeepAliveInterval = TimeSpan.FromSeconds(120),
                 ReceiveBufferSize = 4 * 1024
             };
             app.UseWebSockets(webSocketOptions);
+            app.UseMiddleware<WebSocketMiddleware>();
+
+            app.UseDefaultFiles();
+            app.UseStaticFiles();
         }
 
 

@@ -43,7 +43,7 @@ namespace HomeAutomationDemo.Web.Services.DeviceControlFacilities
             {
                 while (true)
                 {
-                    Console.Write("> ");
+                    //Console.Write("> ");
                     var input = (await Console.In.ReadLineAsync()).AsCommandArguments();
                     var commandName = input.FirstOrDefault()?.ToLowerInvariant();
                     switch (commandName)
@@ -120,8 +120,6 @@ namespace HomeAutomationDemo.Web.Services.DeviceControlFacilities
 
             CommandReceived?.Invoke(this, new UpdateLight { Light = light, DesiredStatus = lightStatus });
         }
-
-
 
         public Task UpdateAlarm(AlarmStatus status)
         {

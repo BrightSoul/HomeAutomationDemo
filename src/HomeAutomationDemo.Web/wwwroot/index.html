@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<title>La mia prima pagina HTML</title>
-		<link href="styles/main.css" rel="stylesheet" type="text/css"></link>
+		<title>.NET Core + RPi2: Home automation demo</title>
+		<link href="styles/main.css" rel="stylesheet" type="text/css" />
 	</head>
 	<body>
 		<h1>My home &#x3009; Control panel</h1>
@@ -17,54 +17,97 @@
 				<td><img id="yellow" src="images/parts/yellow-off.png" data-status="off" width="678" height="579" /></td>
 				<td><img id="doorbell" src="images/parts/doorbell-off.png" data-status="off" width="138" height="579" /></td>
 			</tr>
-		<table>
+		</table>
 		
 		<script>
 		function HomeControlPanel() {
-			var self = this;
+            var self = this;
+            var socket = createWebSocket();
 			initUI();
 						
-			this.updateRoom = function(roomId, status) {
+			function handleLight(roomId, status) {
 				var room = document.getElementById(roomId);
 				room.src = 'images/parts/' + roomId + '-' + status + '.png';
 				room.setAttribute('data-status', status);
 			};
 			
-			this.updateAlarm = function(status) {
+			function handleAlarm(status) {
 				var alarm = document.getElementById('alarm');
 				alarm.src = 'images/parts/alarm-' + status + '.png';
 				alarm.setAttribute('data-status', status);
 			};
 			
-			this.updateDoorbell = function(status) {
+			function handleDoorbell(status) {
 				var doorbell = document.getElementById('doorbell');
 				doorbell.src = 'images/parts/doorbell-' + status + '.png';
 				doorbell.setAttribute('data-status', status);
 			};
 			
-			function toggleRoomLight(event) {
+			function updateLight(event) {
 				var room = event.target;
-				var oppositeStatus = room.getAttribute("data-status") == "off" ? "on" : "off";
-				console.log("Turn " + room.id + " " + oppositeStatus);
-				self.updateRoom(room.id, oppositeStatus);
+                var oppositeStatus = room.getAttribute("data-status") == "off" ? "on" : "off";
+                var message = "light " + oppositeStatus + " " + room.id;
+                console.log("Sending: " + message);
+                socket.send(message);
 			};
 			
-			function toggleAlarm(event) {
+			function updateAlarm(event) {
 				var alarm = event.target;
 				var oppositeStatus = alarm.getAttribute("data-status") == "off" ? "on" : "off";
-				console.log("Turn " + alarm.id + " " + oppositeStatus);
-				self.updateAlarm(oppositeStatus);
+                var message = "alarm " + oppositeStatus;
+                console.log("Sending: " + message);
+                socket.send(message);
 			};
 			
 			function initUI() {
 				var rooms = ["red", "green", "blue", "yellow"];
 				var room;
 				for (var i = 0; i < rooms.length; i++) {
-					console.log(toggleRoomLight);
+					console.log(updateLight);
 					room = document.getElementById(rooms[i]);
-					room.addEventListener("click", toggleRoomLight, false);
-				}
-			}
+					room.addEventListener("click", updateLight, false);
+                }
+                var alarm = document.getElementById("alarm");
+                alarm.addEventListener("click", updateAlarm, false);
+            }
+
+            function receiveMessage(message) {
+                var commandArguments = message.data.split(" ");
+                var commandName = commandArguments[0];
+                switch (commandName) {
+                    case "light":
+                        handleLight(commandArguments[2], commandArguments[1]);
+                        break;
+                    case "alarm":
+                        handleAlarm(commandArguments[1]);
+                        break;
+                    case "doorbell":
+                        handleDoorbell(commandArguments[1]);
+                        break;
+                }
+                console.log("Received: " + message.data);
+            }
+
+            function createWebSocket() {
+                var scheme = document.location.protocol == "https:" ? "wss" : "ws";
+                var port = document.location.port ? (":" + document.location.port) : "";
+                var connectionUrl = scheme + "://" + document.location.hostname + port + "/ws";
+
+                var socket = new WebSocket(connectionUrl);
+
+                socket.onopen = function (event) {
+                    console.log("websocket opened");
+                };
+                socket.onclose = function (event) {
+                    console.log("websocket closed");
+                };
+                socket.onerror = function (event) {
+                    console.log("websocket error", event);
+                };
+                socket.onmessage = receiveMessage;
+
+                return socket;
+            }
 		}
 		var controlPanel = new HomeControlPanel();
 		

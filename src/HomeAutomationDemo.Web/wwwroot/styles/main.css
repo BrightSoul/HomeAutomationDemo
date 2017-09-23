@@ -17,6 +17,10 @@ table, td, tr, img {
 	padding: 0;
 }
 
+#homeplan {
+    zoom: 50%;
+}
+
 #homeplan img {
 	cursor: pointer;
 	display: block;
