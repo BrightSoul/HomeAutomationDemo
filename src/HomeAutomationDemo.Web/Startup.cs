@@ -22,9 +22,9 @@ namespace HomeAutomationDemo
         public void ConfigureServices(IServiceCollection services)
         {
 
-            //#if !DEBUG
+            #if !DEBUG
             services.AddSingleton<IDeviceControlFacility, GpioFacility>();
-            //#endif
+            #endif
 
             services.AddSingleton<IDeviceControlFacility, AzureIotHubFacility>();
             services.AddSingleton<IDeviceControlFacility, LogFacility>();
