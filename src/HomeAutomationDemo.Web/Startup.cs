@@ -10,6 +10,7 @@ using HomeAutomationDemo.Web.Services.DeviceControlFacilities;
 using HomeAutomationDemo.Web.Services;
 using HomeAutomationDemo.Web.Services.DeviceManager;
 using HomeAutomationDemo.Web.Middlewares;
+using Unosquare.RaspberryIO;
 
 namespace HomeAutomationDemo
 {
@@ -22,16 +23,24 @@ namespace HomeAutomationDemo
         public void ConfigureServices(IServiceCollection services)
         {
 
-            #if !DEBUG
-            services.AddSingleton<IDeviceControlFacility, GpioFacility>();
-            #endif
-
+            //Let's see if we're installed locally by attempting to retrieve the Raspberry PI info
+            try
+            {
+                var info = Pi.Info;
+                //yes, we can turn GPIO's on and off
+                services.AddSingleton<IDeviceControlFacility, GpioFacility>();
+                services.AddSingleton<IDeviceManager, LocalDeviceManager>();
+            } catch
+            {
+                //no, this webapp is installed on a remote machine so we'll have to rely on IoT Hubs to deliver commands
+                services.AddSingleton<IDeviceManager, RemoteDeviceManager>();
+            }
             services.AddSingleton<IDeviceControlFacility, AzureIotHubFacility>();
             services.AddSingleton<IDeviceControlFacility, LogFacility>();
             services.AddSingleton<IDeviceControlFacility, WebsocketFacility>();
             services.AddSingleton<IDeviceControlFacility, ConsoleFacility>();
 
-            services.AddSingleton<IDeviceManager, DeviceManager>();
+            
             services.AddSingleton<IDeviceStatusProvider>(serviceProvider => serviceProvider.GetService<IDeviceManager>());
             services.AddSingleton<IWebSocketControlFacility>(serviceProvider => serviceProvider.GetServices<IDeviceControlFacility>().OfType<IWebSocketControlFacility>().First());
             

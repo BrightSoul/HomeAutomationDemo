@@ -8,8 +8,10 @@ using HomeAutomationDemo.Model.Enums;
 using HomeAutomationDemo.Model.Commands;
 using System.Threading.Tasks;
 
+
+//TODO: DEVE INVIARE I COMANDI ALL'AZURE IOT HUB
 namespace HomeAutomationDemo.Web.Services.DeviceManager {
-    public class DeviceManager : IDeviceManager
+    public class RemoteDeviceManager : IDeviceManager
     {
         private readonly IServiceProvider serviceProvider;
         private readonly List<IDeviceControlFacility> deviceFacilities;
@@ -19,7 +21,7 @@ namespace HomeAutomationDemo.Web.Services.DeviceManager {
         private DoorbellStatus doorbellStatus = DoorbellStatus.Off;
         private AlarmStatus alarmStatus = AlarmStatus.Off;
 
-        public DeviceManager(IServiceProvider serviceProvider)
+        public RemoteDeviceManager(IServiceProvider serviceProvider)
         {
             deviceFacilities = new List<IDeviceControlFacility>();
             lights = new Dictionary<Light, LightStatus>() { { Light.Blue, LightStatus.Off }, { Light.Green, LightStatus.Off }, { Light.Red, LightStatus.Off }, { Light.Yellow, LightStatus.Off } };

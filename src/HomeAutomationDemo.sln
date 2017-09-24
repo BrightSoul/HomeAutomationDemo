@@ -5,9 +5,7 @@ VisualStudioVersion = 15.0.26730.15
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HomeAutomationDemo.Web", "HomeAutomationDemo.Web\HomeAutomationDemo.Web.csproj", "{F775B785-8213-4DF9-B2E7-419454CB9D9C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HomeAutomationDemo.Mobile", "HomeAutomationDemo.Mobile\HomeAutomationDemo.Mobile.csproj", "{9CB0D5F1-3DDA-49B5-9ABB-FD90AFEFC62D}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HomeAutomationDemo.Model", "HomeAutomationDemo.Model\HomeAutomationDemo.Model.csproj", "{23F57C16-A655-45C0-A6B4-4B71A4A15618}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HomeAutomationDemo.Model", "HomeAutomationDemo.Model\HomeAutomationDemo.Model.csproj", "{23F57C16-A655-45C0-A6B4-4B71A4A15618}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -19,12 +17,6 @@ Global
 		{F775B785-8213-4DF9-B2E7-419454CB9D9C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F775B785-8213-4DF9-B2E7-419454CB9D9C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F775B785-8213-4DF9-B2E7-419454CB9D9C}.Release|Any CPU.Build.0 = Release|Any CPU
-		{9CB0D5F1-3DDA-49B5-9ABB-FD90AFEFC62D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{9CB0D5F1-3DDA-49B5-9ABB-FD90AFEFC62D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{9CB0D5F1-3DDA-49B5-9ABB-FD90AFEFC62D}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
-		{9CB0D5F1-3DDA-49B5-9ABB-FD90AFEFC62D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{9CB0D5F1-3DDA-49B5-9ABB-FD90AFEFC62D}.Release|Any CPU.Build.0 = Release|Any CPU
-		{9CB0D5F1-3DDA-49B5-9ABB-FD90AFEFC62D}.Release|Any CPU.Deploy.0 = Release|Any CPU
 		{23F57C16-A655-45C0-A6B4-4B71A4A15618}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{23F57C16-A655-45C0-A6B4-4B71A4A15618}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{23F57C16-A655-45C0-A6B4-4B71A4A15618}.Release|Any CPU.ActiveCfg = Release|Any CPU
