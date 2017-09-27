@@ -30,10 +30,12 @@ namespace HomeAutomationDemo
                 //yes, we can turn GPIO's on and off
                 services.AddSingleton<IDeviceControlFacility, GpioFacility>();
                 services.AddSingleton<IDeviceManager, LocalDeviceManager>();
+                Console.WriteLine("Starting in LOCAL mode");
             } catch
             {
                 //no, this webapp is installed on a remote machine so we'll have to rely on IoT Hubs to deliver commands
                 services.AddSingleton<IDeviceManager, RemoteDeviceManager>();
+                Console.WriteLine("Starting in REMOTE mode");
             }
             services.AddSingleton<IDeviceControlFacility, AzureIotHubFacility>();
             services.AddSingleton<IDeviceControlFacility, LogFacility>();

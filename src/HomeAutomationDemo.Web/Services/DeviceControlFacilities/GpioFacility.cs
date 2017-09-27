@@ -14,8 +14,8 @@ namespace HomeAutomationDemo.Web.Services.DeviceControlFacilities
     {
         public event EventHandler<Command> CommandReceived;
 
-        private readonly GpioPin pushButtonPin = Pi.Gpio.Pin01;
-        private readonly GpioPin buzzerPin = Pi.Gpio.Pin00;
+        private readonly GpioPin pushButtonPin = Pi.Gpio.Pin00;
+        private readonly GpioPin buzzerPin = Pi.Gpio.Pin01;
         private readonly GpioPin sirenPin = Pi.Gpio.Pin07;
         private readonly Dictionary<Light, GpioPin> lightPins = new Dictionary<Light, GpioPin>()
         {
@@ -49,18 +49,34 @@ namespace HomeAutomationDemo.Web.Services.DeviceControlFacilities
             foreach (var lightPin in lightPins)
             {
                 lightPin.Value.PinMode = GpioPinDriveMode.Output;
+                lightPin.Value.Write(GpioPinValue.Low);
             }
             pushButtonPin.PinMode = GpioPinDriveMode.Input;
             sirenPin.PinMode = GpioPinDriveMode.Output;
-            buzzerPin.PinMode = GpioPinDriveMode.Output;
+            sirenPin.Write(GpioPinValue.Low);
 
+            //https://raspberrypi.stackexchange.com/questions/53854/driving-pwm-output-frequency
+            //https://projects.drogon.net/raspberry-pi/wiringpi/software-pwm-library/
+            buzzerPin.PinMode = GpioPinDriveMode.Output;
+            buzzerPin.StartSoftPwm(0, 2);
+            //buzzerPin.PwmClockDivisor = 16; // 1.2 Mhz
+            //buzzerPin.PwmRange = 1200000 / 4000; // 4Khz
+            //buzzerPin.PwmMode = PwmMode.MarkSign;
+            
         }
 
         private void BlinkAlarm(object sender, EventArgs e)
         {
             blinkStatus = !blinkStatus;
-            sirenPin.Write(blinkStatus ? GpioPinValue.High : GpioPinValue.Low);
-            buzzerPin.Write(blinkStatus ? GpioPinValue.High : GpioPinValue.Low);
+            if (blinkStatus)
+            {
+                buzzerPin.SoftPwmValue = 1;
+                sirenPin.Write(GpioPinValue.High);
+            } else
+            {
+                buzzerPin.SoftPwmValue = 0;
+                sirenPin.Write(GpioPinValue.Low);
+            }
             //Console.WriteLine($"GPIO{sirenPin} is now {(blinkStatus ? "HIGH": "LOW")}");
             //Console.WriteLine($"GPIO{buzzerPin} is now {(blinkStatus ? "HIGH" : "LOW")}");
         }
@@ -79,7 +95,7 @@ namespace HomeAutomationDemo.Web.Services.DeviceControlFacilities
                     blinkStatus = false;
                     alarmTimer.Enabled = false;
                     sirenPin.Write(GpioPinValue.Low);
-                    buzzerPin.Write(GpioPinValue.Low);
+                    buzzerPin.SoftPwmValue = 0;
                     //Console.WriteLine($"GPIO{sirenPin} is now LOW");
                     //Console.WriteLine($"GPIO{buzzerPin} is now LOW");
                     break;
@@ -100,7 +116,13 @@ namespace HomeAutomationDemo.Web.Services.DeviceControlFacilities
 
         public Task UpdateDoorbell(DoorbellStatus status)
         {
-            buzzerPin.Write(status == DoorbellStatus.On ? GpioPinValue.High : GpioPinValue.Low);
+            if (status == DoorbellStatus.On)
+            {
+                buzzerPin.SoftPwmValue = 1;
+            } else
+            {
+                buzzerPin.SoftPwmValue = 0;
+            }
             //Console.WriteLine($"GPIO{gpio} is now {(status == DoorbellStatus.On ? "HIGH" : "LOW")}");
             return Task.CompletedTask;
         }
