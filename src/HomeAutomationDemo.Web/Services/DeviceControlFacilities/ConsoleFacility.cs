@@ -82,7 +82,7 @@ namespace HomeAutomationDemo.Web.Services.DeviceControlFacilities
             }
 
             CommandReceived?.Invoke(this, new UpdateDoorbell { DesiredStatus = DoorbellStatus.On });
-            await Task.Delay(1000);
+            await Task.Delay(3000);
             CommandReceived?.Invoke(this, new UpdateDoorbell { DesiredStatus = DoorbellStatus.Off });
         }
 
