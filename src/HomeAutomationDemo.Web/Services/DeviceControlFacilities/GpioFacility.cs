@@ -22,10 +22,10 @@ namespace HomeAutomationDemo.Web.Services.DeviceControlFacilities
 
         private readonly Dictionary<Light, GpioPin> lightPins = new Dictionary<Light, GpioPin>() //leds (output)
         {
-            { Light.Red, Pi.Gpio.Pin02 },
-            { Light.Yellow, Pi.Gpio.Pin03 },
+            { Light.Green, Pi.Gpio.Pin02 },
+            { Light.Red, Pi.Gpio.Pin03 },
             { Light.Blue, Pi.Gpio.Pin04 },
-            { Light.Green, Pi.Gpio.Pin05 }
+            { Light.Yellow, Pi.Gpio.Pin05 }
         };
 
         private const int blinkInterval = 500; //ms
