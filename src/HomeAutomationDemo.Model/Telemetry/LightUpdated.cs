@@ -5,7 +5,7 @@ using System.Text;
 
 namespace HomeAutomationDemo.Model.Telemetry
 {
-    public class LightUpdated : TelemetryEvent
+    public class LightUpdated : Telemetry
     {
         public Light Light { get; set; }
         public LightStatus Status { get; set; }

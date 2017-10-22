@@ -7,12 +7,12 @@ using HomeAutomationDemo.Model.Enums;
 using System.Threading;
 using Microsoft.AspNetCore.Hosting;
 using HomeAutomationDemo.Web.Extensions;
+using HomeAutomationDemo.Model.Telemetry;
 
-namespace HomeAutomationDemo.Web.Services.DeviceControlFacilities
+namespace HomeAutomationDemo.Web.Services.Facilities
 {
-    public class ConsoleFacility : IDeviceControlFacility
+    public class ConsoleFacility : BaseFacility
     {
-        public event EventHandler<Command> CommandReceived;
         private readonly CancellationTokenSource cancellationTokenSource;
         private readonly IDeviceStatusProvider deviceStatusProvider;
         private readonly IApplicationLifetime applicationLifetime;
@@ -81,9 +81,9 @@ namespace HomeAutomationDemo.Web.Services.DeviceControlFacilities
                 return;
             }
 
-            CommandReceived?.Invoke(this, new UpdateDoorbell { DesiredStatus = DoorbellStatus.On });
+            SendCommand(new UpdateDoorbell { DesiredStatus = DoorbellStatus.On });
             await Task.Delay(3000);
-            CommandReceived?.Invoke(this, new UpdateDoorbell { DesiredStatus = DoorbellStatus.Off });
+            SendCommand(new UpdateDoorbell { DesiredStatus = DoorbellStatus.Off });
         }
 
         private void HandleAlarmCommand(string[] commandArguments)
@@ -98,7 +98,7 @@ namespace HomeAutomationDemo.Web.Services.DeviceControlFacilities
                 return;
             }
 
-            CommandReceived?.Invoke(this, new UpdateAlarm { DesiredStatus = alarmStatus });
+            SendCommand(new UpdateAlarm { DesiredStatus = alarmStatus });
         }
 
         private void HandleLightCommand(string[] commandArguments)
@@ -118,24 +118,24 @@ namespace HomeAutomationDemo.Web.Services.DeviceControlFacilities
                 return;
             }
 
-            CommandReceived?.Invoke(this, new UpdateLight { Light = light, DesiredStatus = lightStatus });
+            SendCommand(new UpdateLight { Light = light, DesiredStatus = lightStatus });
         }
 
-        public Task UpdateAlarm(AlarmStatus status)
+        protected override Task HandleLightTelemetry(LightUpdated lightTelemetry)
         {
-            Console.WriteLine($"The alarm is now {status.ToString().ToUpperInvariant()}");
+            Console.WriteLine($"The light in the {lightTelemetry.Light.ToString().ToUpperInvariant()} room is now {lightTelemetry.Status.ToString().ToUpperInvariant()}");
             return Task.CompletedTask;
         }
 
-        public Task UpdateLight(Light light, LightStatus status)
+        protected override Task HandleDoorbellTelemetry(DoorbellUpdated doorbellTelemetry)
         {
-            Console.WriteLine($"The light in the {light.ToString().ToUpperInvariant()} room is now {status.ToString().ToUpperInvariant()}");
+            Console.WriteLine($"The doorbell is now {doorbellTelemetry.Status.ToString().ToUpperInvariant()}");
             return Task.CompletedTask;
         }
 
-        public Task UpdateDoorbell(DoorbellStatus status)
+        protected override Task HandleAlarmTelemetry(AlarmUpdated alarmTelemetry)
         {
-            Console.WriteLine($"The doorbell is now {status.ToString().ToUpperInvariant()}");
+            Console.WriteLine($"The alarm is now {alarmTelemetry.Status.ToString().ToUpperInvariant()}");
             return Task.CompletedTask;
         }
 
@@ -147,7 +147,7 @@ namespace HomeAutomationDemo.Web.Services.DeviceControlFacilities
             Console.WriteLine("\tDOORBELL");
         }
 
-        public void Dispose()
+        public override void Dispose()
         {
             Console.CancelKeyPress -= TerminateApplication;
             cancellationTokenSource.Cancel();

@@ -33,3 +33,4 @@ log.txt
 
 # Visual Studio 2015
 .vs/
+/src/HomeAutomationDemo.Web/appsettings.Development.json

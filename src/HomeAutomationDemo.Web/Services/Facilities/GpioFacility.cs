@@ -7,12 +7,12 @@ using HomeAutomationDemo.Model.Enums;
 using System.Timers;
 using Unosquare.RaspberryIO;
 using Unosquare.RaspberryIO.Gpio;
+using HomeAutomationDemo.Model.Telemetry;
 
-namespace HomeAutomationDemo.Web.Services.DeviceControlFacilities
+namespace HomeAutomationDemo.Web.Services.Facilities
 {
-    public class GpioFacility : IDeviceControlFacility
+    public class GpioFacility : BaseFacility
     {
-        public event EventHandler<Command> CommandReceived;
         private readonly IDeviceStatusProvider deviceStatusProvider;
         
         private readonly GpioPin alarmLedPin = Pi.Gpio.Pin00; //led (ouput)
@@ -66,7 +66,7 @@ namespace HomeAutomationDemo.Web.Services.DeviceControlFacilities
             var doorbellPinOn = doorbellPin.ReadValue() == GpioPinValue.High;
             if (doorbellOn != doorbellPinOn)
             {
-                CommandReceived?.Invoke(this, new UpdateDoorbell() { DesiredStatus = doorbellPinOn ? DoorbellStatus.On : DoorbellStatus.Off });
+                SendCommand(new UpdateDoorbell() { DesiredStatus = doorbellPinOn ? DoorbellStatus.On : DoorbellStatus.Off });
             }
 
             //Doorlock
@@ -76,15 +76,13 @@ namespace HomeAutomationDemo.Web.Services.DeviceControlFacilities
                 case AlarmStatus.On:
                     if (!doorlockPinOn)
                     {
-                        Console.WriteLine("ON");
-                        CommandReceived?.Invoke(this, new UpdateAlarm() { DesiredStatus = AlarmStatus.Active });
+                        SendCommand(new UpdateAlarm() { DesiredStatus = AlarmStatus.Active });
                     }
                     break;
                 case AlarmStatus.Active:
                     if (doorlockPinOn)
                     {
-                        Console.WriteLine("OFF");
-                        CommandReceived?.Invoke(this, new UpdateAlarm() { DesiredStatus = AlarmStatus.Off });
+                        SendCommand(new UpdateAlarm() { DesiredStatus = AlarmStatus.Off });
                     }
                     break;
             }
@@ -131,48 +129,42 @@ namespace HomeAutomationDemo.Web.Services.DeviceControlFacilities
             alarmLedPin.Write(blinkStatus ? GpioPinValue.High : GpioPinValue.Low);
         }
 
-        public Task UpdateAlarm(AlarmStatus status)
+        protected override Task HandleAlarmCommand(UpdateAlarm alarmCommand)
         {
-            switch (status)
+            switch (alarmCommand.DesiredStatus)
             {
                 case AlarmStatus.On:
                     blinkStatus = true;
                     alarmTimer.Enabled = false;
                     alarmLedPin.Write(GpioPinValue.High);
-                    //Console.WriteLine($"GPIO{sirenPin} is now HIGH");
                     break;
                 case AlarmStatus.Off:
                     blinkStatus = false;
                     alarmTimer.Enabled = false;
                     alarmLedPin.Write(GpioPinValue.Low);
                     buzzerPin.SoftPwmValue = 0;
-                    //Console.WriteLine($"GPIO{sirenPin} is now LOW");
-                    //Console.WriteLine($"GPIO{buzzerPin} is now LOW");
                     break;
                 case AlarmStatus.Active:
                     alarmTimer.Enabled = true;
                     break;
             }
+            SendTelemetry(new AlarmUpdated { Status = alarmCommand.DesiredStatus });
             return Task.CompletedTask;
         }
 
-        public Task UpdateLight(Light light, LightStatus status)
+        protected override Task HandleLightCommand(UpdateLight lightCommand)
         {
-            var gpio = lightPins[light];
-            gpio.Write(status == LightStatus.On ? GpioPinValue.High : GpioPinValue.Low);
-            //Console.WriteLine($"GPIO{gpio} is now {(status == LightStatus.On ? "HIGH" : "LOW")}");
+            var gpio = lightPins[lightCommand.Light];
+            gpio.Write(lightCommand.DesiredStatus == LightStatus.On ? GpioPinValue.High : GpioPinValue.Low);
+            SendTelemetry(new LightUpdated { Light = lightCommand.Light, Status = lightCommand.DesiredStatus });
             return Task.CompletedTask;
         }
 
-        public Task UpdateDoorbell(DoorbellStatus status)
+        protected override Task HandleDoorbellCommand(UpdateDoorbell doorbellCommand)
         {
-            buzzerPin.SoftPwmValue = status == DoorbellStatus.On ? 1 : 0;
-            //Console.WriteLine($"GPIO{gpio} is now {(status == DoorbellStatus.On ? "HIGH" : "LOW")}");
+            buzzerPin.SoftPwmValue = doorbellCommand.DesiredStatus == DoorbellStatus.On ? 1 : 0;
+            SendTelemetry(new DoorbellUpdated { Status = doorbellCommand.DesiredStatus });
             return Task.CompletedTask;
-        }
-
-        public void Dispose()
-        {
         }
     }
 }

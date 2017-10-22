@@ -5,7 +5,7 @@ using System.Text;
 
 namespace HomeAutomationDemo.Model.Telemetry
 {
-    public class AlarmUpdated : TelemetryEvent
+    public class AlarmUpdated : Telemetry
     {
         public AlarmStatus Status { get; set; }
     }

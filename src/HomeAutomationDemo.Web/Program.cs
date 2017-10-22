@@ -19,6 +19,7 @@ namespace HomeAutomationDemo
 
         public static IWebHost BuildWebHost(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
+                .UseEnvironment("Development")
                 .UseStartup<Startup>()
                 .UseUrls("http://*:5000")
                 .Build();

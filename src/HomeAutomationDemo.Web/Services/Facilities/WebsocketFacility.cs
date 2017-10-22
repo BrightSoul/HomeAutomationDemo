@@ -11,12 +11,12 @@ using System.Text;
 using System.Threading;
 using HomeAutomationDemo.Web.Extensions;
 using System.Collections.Concurrent;
+using HomeAutomationDemo.Model.Telemetry;
 
-namespace HomeAutomationDemo.Web.Services.DeviceControlFacilities
+namespace HomeAutomationDemo.Web.Services.Facilities
 {
-    public class WebsocketFacility : IDeviceControlFacility, IWebSocketControlFacility
+    public class WebsocketFacility : BaseFacility, IWebSocketControlFacility
     {
-        public event EventHandler<Command> CommandReceived;
         private readonly ConcurrentDictionary<WebSocket, Guid> clients;
 
         private readonly IDeviceStatusProvider deviceStatusProvider;
@@ -54,13 +54,13 @@ namespace HomeAutomationDemo.Web.Services.DeviceControlFacilities
                 switch (commandName)
                 {
                     case "light":
-                        HandleLightCommand(input);
+                        SendLightCommand(input);
                         break;
                     case "alarm":
-                        HandleAlarmCommand(input);
+                        SendAlarmCommand(input);
                         break;
                     case "doorbell":
-                        await HandleDoorbellCommand(input);
+                        await SendDoorbellCommand(input);
                         break;
                 }
                 buffer = new byte[100];
@@ -77,18 +77,18 @@ namespace HomeAutomationDemo.Web.Services.DeviceControlFacilities
             string message;
             foreach (var light in status.Lights)
             {
-                message = UpdateLightMessage(light.Key, light.Value);
-                await SendMessage(message, webSocket);
+                message = CreateLightNotification(light.Key, light.Value);
+                await SendNotificationToClients(message, webSocket);
             }
 
-            message = UpdateAlarmMessage(status.Alarm);
-            await SendMessage(message, webSocket);
+            message = CreateAlarmNotification(status.Alarm);
+            await SendNotificationToClients(message, webSocket);
 
-            message = UpdateDoorbellMessage(status.Doorbell);
-            await SendMessage(message, webSocket);
+            message = CreateDoorbellNotification(status.Doorbell);
+            await SendNotificationToClients(message, webSocket);
         }
 
-        private async Task SendMessage(string message, WebSocket webSocket = null)
+        private async Task SendNotificationToClients(string message, WebSocket webSocket = null)
         {
             var sockets = webSocket != null ? new[] { webSocket } : clients.Keys.ToArray();
             foreach (var socket in sockets)
@@ -104,19 +104,19 @@ namespace HomeAutomationDemo.Web.Services.DeviceControlFacilities
             }
         }
 
-        private async Task HandleDoorbellCommand(string[] commandArguments)
+        private async Task SendDoorbellCommand(string[] commandArguments)
         {
             if (commandArguments.Length != 1)
             {
                 return;
             }
 
-            CommandReceived?.Invoke(this, new UpdateDoorbell { DesiredStatus = DoorbellStatus.On });
+            SendCommand(new UpdateDoorbell { DesiredStatus = DoorbellStatus.On });
             await Task.Delay(1000);
-            CommandReceived?.Invoke(this, new UpdateDoorbell { DesiredStatus = DoorbellStatus.Off });
+            SendCommand(new UpdateDoorbell { DesiredStatus = DoorbellStatus.Off });
         }
 
-        private void HandleAlarmCommand(string[] commandArguments)
+        private void SendAlarmCommand(string[] commandArguments)
         {
             if (commandArguments.Length != 2)
             {
@@ -128,10 +128,10 @@ namespace HomeAutomationDemo.Web.Services.DeviceControlFacilities
                 return;
             }
 
-            CommandReceived?.Invoke(this, new UpdateAlarm { DesiredStatus = alarmStatus });
+            SendCommand(new UpdateAlarm { DesiredStatus = alarmStatus });
         }
 
-        private void HandleLightCommand(string[] commandArguments)
+        private void SendLightCommand(string[] commandArguments)
         {
             if (commandArguments.Length != 3)
             {
@@ -148,46 +148,41 @@ namespace HomeAutomationDemo.Web.Services.DeviceControlFacilities
                 return;
             }
 
-            CommandReceived?.Invoke(this, new UpdateLight { Light = light, DesiredStatus = lightStatus });
+            SendCommand(new UpdateLight { Light = light, DesiredStatus = lightStatus });
         }
 
-
-        public async Task UpdateAlarm(AlarmStatus status)
+        protected override async Task HandleAlarmTelemetry(AlarmUpdated alarmTelemetry)
         {
-            var message = UpdateAlarmMessage(status);
-            await SendMessage(message);
+            var notification = CreateAlarmNotification(alarmTelemetry.Status);
+            await SendNotificationToClients(notification);
         }
 
-        private string UpdateAlarmMessage(AlarmStatus status)
+        private string CreateAlarmNotification(AlarmStatus status)
         {
             return $"alarm {status.ToString().ToLower()}";
         }
 
-        public async Task UpdateLight(Light light, LightStatus status)
+        protected override async Task HandleLightTelemetry(LightUpdated lightTelemetry)
         {
-            var message = UpdateLightMessage(light, status);
-            await SendMessage(message);
+            var notification = CreateLightNotification(lightTelemetry.Light, lightTelemetry.Status);
+            await SendNotificationToClients(notification);
         }
 
-        private string UpdateLightMessage(Light light, LightStatus status)
+        private string CreateLightNotification(Light light, LightStatus status)
         {
             return $"light {status.ToString().ToLower()} {light.ToString().ToLower()}";
         }
 
-        public async Task UpdateDoorbell(DoorbellStatus status)
+        protected override async Task HandleDoorbellTelemetry(DoorbellUpdated doorbellTelemetry)
         {
-            var message = UpdateDoorbellMessage(status);
-            await SendMessage(message);
+            var notification = CreateDoorbellNotification(doorbellTelemetry.Status);
+            await SendNotificationToClients(notification);
         }
 
-        private string UpdateDoorbellMessage(DoorbellStatus status)
+        private string CreateDoorbellNotification(DoorbellStatus status)
         {
             return $"doorbell {status.ToString().ToLower()}";
         }
 
-        public void Dispose()
-        {
-            
-        }
     }
 }

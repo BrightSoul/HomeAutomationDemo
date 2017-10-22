@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace HomeAutomationDemo.Web.Services
 {
-    public interface IWebSocketControlFacility : IDeviceControlFacility
+    public interface IWebSocketControlFacility
     {
         Task HandleWebSocketCommunication(HttpContext httpContext, WebSocket webSocket);
     }

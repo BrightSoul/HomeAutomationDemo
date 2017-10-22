@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
-using HomeAutomationDemo.Web.Services.DeviceControlFacilities;
+using HomeAutomationDemo.Web.Services.Facilities;
 using HomeAutomationDemo.Web.Services;
 using HomeAutomationDemo.Web.Services.DeviceManager;
 using HomeAutomationDemo.Web.Middlewares;
@@ -28,29 +28,32 @@ namespace HomeAutomationDemo
             {
                 var info = Pi.Info;
                 //yes, we can turn GPIO's on and off
-                services.AddSingleton<IDeviceControlFacility, GpioFacility>();
-                services.AddSingleton<IDeviceManager, LocalDeviceManager>();
+                services.AddSingleton<BaseFacility, GpioFacility>();
+                services.AddSingleton<BaseFacility, AzureIotHubDeviceFacility>();
                 Console.WriteLine("Starting in LOCAL mode");
             } catch
             {
-                //no, this webapp is installed on a remote machine so we'll have to rely on IoT Hubs to deliver commands
-                services.AddSingleton<IDeviceManager, RemoteDeviceManager>();
+                //no, this webapp is installed on a remote machine so we rely on IoT Hubs to deliver commands
+                services.AddSingleton<BaseFacility, AlertFacility>();
+                services.AddSingleton<BaseFacility, AzureIotHubServiceFacility>();
                 Console.WriteLine("Starting in REMOTE mode");
             }
-            services.AddSingleton<IDeviceControlFacility, AzureIotHubFacility>();
-            services.AddSingleton<IDeviceControlFacility, LogFacility>();
-            services.AddSingleton<IDeviceControlFacility, WebsocketFacility>();
-            services.AddSingleton<IDeviceControlFacility, ConsoleFacility>();
+            services.AddSingleton<IDeviceManager, DeviceManager>();
+            services.AddSingleton<BaseFacility, LogFacility>();
+            services.AddSingleton<BaseFacility, WebsocketFacility>();
+            services.AddSingleton<BaseFacility, ConsoleFacility>();
+            services.AddSingleton<AppConfig>();
 
             
             services.AddSingleton<IDeviceStatusProvider>(serviceProvider => serviceProvider.GetService<IDeviceManager>());
-            services.AddSingleton<IWebSocketControlFacility>(serviceProvider => serviceProvider.GetServices<IDeviceControlFacility>().OfType<IWebSocketControlFacility>().First());
+            services.AddSingleton<IWebSocketControlFacility>(serviceProvider => serviceProvider.GetServices<BaseFacility>().OfType<IWebSocketControlFacility>().First());
             
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, IApplicationLifetime applicationLifetime, IServiceProvider serviceProvider)
         {
+            Console.WriteLine($"Environment: {env.EnvironmentName}");
             applicationLifetime.ApplicationStarted.Register(() => OnStart(serviceProvider));
             applicationLifetime.ApplicationStopped.Register(OnStop);
 

@@ -4,9 +4,9 @@ using System.Text;
 
 namespace HomeAutomationDemo.Model.Telemetry
 {
-    public abstract class TelemetryEvent
+    public abstract class Telemetry
     {
-        public TelemetryEvent()
+        public Telemetry()
         {
             Id = Guid.NewGuid();
             OccurredAt = DateTimeOffset.Now;
