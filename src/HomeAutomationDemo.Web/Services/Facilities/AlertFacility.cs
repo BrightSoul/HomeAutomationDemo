@@ -14,6 +14,7 @@ namespace HomeAutomationDemo.Web.Services.Facilities
     {
         private readonly IDeviceStatusProvider deviceStatusProvider;
         private readonly AppConfig config;
+        private AlarmStatus? lastEmailSentFor;
         public AlertFacility(IDeviceStatusProvider deviceStatusProvider, AppConfig config)
         {
             this.config = config;
@@ -21,13 +22,15 @@ namespace HomeAutomationDemo.Web.Services.Facilities
         }
         protected override async Task HandleAlarmTelemetry(AlarmUpdated alarmTelemetry)
         {
-            if (alarmTelemetry.Status == AlarmStatus.Active && deviceStatusProvider.CurrentStatus.Alarm != AlarmStatus.Active)
+            if (alarmTelemetry.Status == AlarmStatus.Active && lastEmailSentFor.Value != AlarmStatus.Active)
             {
-                //Someone broke into our house!!
+                lastEmailSentFor = AlarmStatus.Active;
+                //Someone broke into our house, inform the owner!!
                 await SendAlertMail();
-            } else if (alarmTelemetry.Status != AlarmStatus.Active && deviceStatusProvider.CurrentStatus.Alarm == AlarmStatus.Active)
+            } else if (alarmTelemetry.Status != AlarmStatus.Active && lastEmailSentFor != AlarmStatus.Off)
             {
                 //The alarm was turned off
+                lastEmailSentFor = AlarmStatus.Off;
                 await SendRecoveryMail();
             }
         }

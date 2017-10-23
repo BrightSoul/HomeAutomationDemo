@@ -35,7 +35,7 @@ namespace HomeAutomationDemo.Web.Services.Facilities
                 config.EventHubConnectionString,
                 config.StorageConnectionString,
                 config.StorageContainerName);
-            processorHost.RegisterEventProcessorFactoryAsync(this, new EventProcessorOptions { InitialOffsetProvider = s => null });
+            processorHost.RegisterEventProcessorFactoryAsync(this, new EventProcessorOptions { InitialOffsetProvider = s => DateTimeOffset.Now });
             EnsureServiceClientIsReady();
         }
 
